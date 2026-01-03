@@ -22,12 +22,12 @@ A unique travel-focused dating application that connects travelers with local gu
 - **Cloudinary**: Image storage
 
 ### Frontend
-- **React**: Web application (mobile-first design)
-- **Redux Toolkit**: State management
-- **Socket.io-client**: Real-time communication
-- **React Router**: Navigation
-- **Tailwind CSS**: Responsive styling
+- **React Native + Expo**: Mobile application
+- **React Navigation**: Navigation system
+- **StyleSheet / NativeWind**: Styling (Tailwind for React Native)
 - **React Query**: Data fetching and caching
+- **Context / Redux Toolkit**: State management (advanced)
+- **Socket.io-client**: Real-time communication
 
 ## 📁 Project Structure
 
@@ -45,16 +45,17 @@ jj-meet/
 │   ├── config/            # Configuration files
 │   └── migrations/        # Database migrations
 │
-├── frontend/              # React web application
+├── frontend/              # React Native + Expo application
 │   ├── src/
 │   │   ├── components/    # Reusable components
-│   │   ├── pages/         # Page components
+│   │   ├── screens/       # Screen components
 │   │   ├── features/      # Feature modules
 │   │   ├── hooks/         # Custom hooks
 │   │   ├── services/      # API services
-│   │   ├── store/         # Redux store
+│   │   ├── navigation/    # React Navigation setup
+│   │   ├── store/         # Redux store (optional)
 │   │   └── utils/         # Utility functions
-│   └── public/            # Static assets
+│   └── assets/            # Static assets (images, fonts)
 │
 └── docker-compose.yml     # Docker configuration
 ```
@@ -87,8 +88,8 @@ cp .env.example .env
 ```bash
 cd ../frontend
 npm install
-cp .env.example .env.local
-# Edit .env.local with your configuration
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
 4. Set up the database
@@ -109,7 +110,7 @@ npm run dev
 Frontend (in another terminal):
 ```bash
 cd frontend
-npm start
+npx expo start
 ```
 
 ## 🔐 Environment Variables
@@ -124,19 +125,20 @@ CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
 GOOGLE_MAPS_API_KEY=your_google_maps_key
 ```
 
-### Frontend (.env.local)
+### Frontend (.env)
 ```
-REACT_APP_API_URL=http://localhost:5000
-REACT_APP_SOCKET_URL=http://localhost:5000
-REACT_APP_GOOGLE_MAPS_KEY=your_google_maps_key
+EXPO_PUBLIC_API_URL=http://localhost:5000
+EXPO_PUBLIC_SOCKET_URL=http://localhost:5000
+EXPO_PUBLIC_GOOGLE_MAPS_KEY=your_google_maps_key
 ```
 
-## 📱 Mobile Migration Path
+## 📱 Mobile Platform
 
-The frontend is built with mobile-first responsive design, making it easy to:
-1. Wrap in React Native WebView for quick mobile app
-2. Migrate to React Native using similar component structure
-3. Share Redux store and API services between web and mobile
+The app is built with React Native + Expo for cross-platform mobile development:
+- **iOS**: Native iOS app via Expo
+- **Android**: Native Android app via Expo
+- **Development**: Fast refresh and easy testing with Expo Go
+- **Deployment**: Easy build and distribution with EAS Build
 
 ## 🔒 Safety Features
 
