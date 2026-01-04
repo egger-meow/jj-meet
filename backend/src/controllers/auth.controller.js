@@ -1,116 +1,99 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 const { validationResult } = require('express-validator');
+const AuthService = require('../services/auth.service');
+const UserService = require('../services/user.service');
 
-const generateToken = (userId) => {
-  return jwt.sign(
-    { userId },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
-  );
-};
-
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, name, birth_date, user_type, gender } = req.body;
-
-    // Check if user exists
-    const existingUser = await User.findByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
-    }
-
-    // Create user
-    const user = await User.create({
-      email,
-      password,
-      name,
-      birth_date,
-      user_type: user_type || 'tourist',
-      gender
-    });
-
-    const token = generateToken(user.id);
+    const user = await AuthService.register(req.body);
+    const { accessToken, refreshToken } = await AuthService.login(
+      req.body.email,
+      req.body.password,
+      req.body.deviceInfo || {}
+    );
 
     res.status(201).json({
-      message: 'Registration successful',
-      user,
-      token
+      success: true,
+      data: { user, accessToken, refreshToken, expiresIn: 900 }
     });
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    next(error);
   }
 };
 
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    const { email, password, deviceId, deviceName, platform } = req.body;
+    const result = await AuthService.login(email, password, { deviceId, deviceName, platform });
 
-    // Find user
-    const user = await User.findByEmail(email);
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Verify password
-    const isMatch = await User.verifyPassword(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = generateToken(user.id);
-    delete user.password;
-
-    res.json({
-      message: 'Login successful',
-      user,
-      token
-    });
+    res.json({ success: true, data: result });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    next(error);
   }
 };
 
-exports.getProfile = async (req, res) => {
+exports.refresh = async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    delete user.password;
-    res.json(user);
+    const { refreshToken, deviceId } = req.body;
+    const result = await AuthService.refreshTokens(refreshToken, deviceId);
+    res.json({ success: true, data: result });
   } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ error: 'Failed to fetch profile' });
+    next(error);
   }
 };
 
-exports.updateProfile = async (req, res) => {
+exports.logout = async (req, res, next) => {
   try {
-    const updates = req.body;
-    delete updates.password; // Don't allow password update through this endpoint
-    delete updates.email; // Don't allow email update without verification
-
-    const user = await User.updateProfile(req.userId, updates);
-    res.json({
-      message: 'Profile updated successfully',
-      user
-    });
+    const { deviceId } = req.body;
+    await AuthService.logout(req.userId, deviceId);
+    res.json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    next(error);
+  }
+};
+
+exports.logoutAll = async (req, res, next) => {
+  try {
+    const { deviceId } = req.body;
+    await AuthService.logoutAllDevices(req.userId, deviceId);
+    res.json({ success: true, message: 'Logged out from all devices' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getDevices = async (req, res, next) => {
+  try {
+    const devices = await AuthService.getDevices(req.userId);
+    res.json({ success: true, data: devices });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getProfile = async (req, res, next) => {
+  try {
+    const user = await UserService.findById(req.userId);
+    res.json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const user = await UserService.updateProfile(req.userId, req.body);
+    res.json({ success: true, data: user, message: 'Profile updated successfully' });
+  } catch (error) {
+    next(error);
   }
 };
