@@ -134,6 +134,33 @@ class SwipeService {
     return query;
   }
 
+  static async markLikesAsSeen(userId, likerIds = []) {
+    if (likerIds.length === 0) {
+      return knex('swipes')
+        .where('swiped_id', userId)
+        .whereIn('direction', [this.SWIPE_DIRECTIONS.LIKE, this.SWIPE_DIRECTIONS.SUPER_LIKE])
+        .where('is_seen', false)
+        .update({ is_seen: true });
+    }
+
+    return knex('swipes')
+      .where('swiped_id', userId)
+      .whereIn('swiper_id', likerIds)
+      .where('is_seen', false)
+      .update({ is_seen: true });
+  }
+
+  static async getUnseenLikesCount(userId) {
+    const result = await knex('swipes')
+      .where('swiped_id', userId)
+      .whereIn('direction', [this.SWIPE_DIRECTIONS.LIKE, this.SWIPE_DIRECTIONS.SUPER_LIKE])
+      .where('is_seen', false)
+      .count('id as count')
+      .first();
+
+    return parseInt(result?.count || 0, 10);
+  }
+
   static async getDiscoveryCandidates(userId, options = {}) {
     const {
       maxDistance = 50,
@@ -247,6 +274,146 @@ class SwipeService {
     }
 
     return lastSwipe;
+  }
+
+  static async getTripAwareDiscovery(userId, options = {}) {
+    const {
+      tripId = null,
+      maxDistance = 50,
+      limit = 20,
+      filters = {}
+    } = options;
+
+    const swipedUserIds = await knex('swipes')
+      .where('swiper_id', userId)
+      .pluck('swiped_id');
+
+    const blockedUserIds = await this.getBlockedUserIds(userId);
+    const excludeIds = [...new Set([userId, ...swipedUserIds, ...blockedUserIds])];
+
+    if (tripId) {
+      return this.getDiscoveryForTrip(userId, tripId, excludeIds, maxDistance, limit, filters);
+    }
+
+    return this.getDiscoveryCandidates(userId, { maxDistance, limit, filters });
+  }
+
+  static async getDiscoveryForTrip(userId, tripId, excludeIds, maxDistance, limit, filters) {
+    const trip = await knex('trips')
+      .where({ id: tripId, user_id: userId })
+      .first();
+
+    if (!trip) {
+      const error = new Error('Trip not found');
+      error.statusCode = 404;
+      error.code = 'TRIP_NOT_FOUND';
+      throw error;
+    }
+
+    if (!trip.destination_geom) {
+      return [];
+    }
+
+    const now = new Date().toISOString().split('T')[0];
+    
+    let candidatesQuery = knex('users')
+      .select(
+        'users.*',
+        knex.raw(
+          `ST_Distance(users.location::geography, ?::geography) / 1000 as distance`,
+          [trip.destination_geom]
+        ),
+        knex.raw(`NULL as overlap_days`),
+        knex.raw(`'local' as match_type`)
+      )
+      .where('users.is_active', true)
+      .whereNotIn('users.id', excludeIds)
+      .whereRaw(
+        `ST_DWithin(users.location::geography, ?::geography, ?)`,
+        [trip.destination_geom, maxDistance * 1000]
+      );
+
+    if (filters.user_type) {
+      candidatesQuery = candidatesQuery.where('users.user_type', filters.user_type);
+    }
+    if (filters.is_guide !== undefined) {
+      candidatesQuery = candidatesQuery.where('users.is_guide', filters.is_guide);
+    }
+    if (filters.gender) {
+      candidatesQuery = candidatesQuery.where('users.gender', filters.gender);
+    }
+
+    const localCandidates = await candidatesQuery.limit(Math.ceil(limit / 2));
+
+    const travelerCandidates = await knex('trips')
+      .join('users', 'trips.user_id', 'users.id')
+      .select(
+        'users.*',
+        knex.raw(
+          `ST_Distance(trips.destination_geom::geography, ?::geography) / 1000 as distance`,
+          [trip.destination_geom]
+        ),
+        knex.raw(`
+          GREATEST(0, 
+            LEAST(trips.end_date, ?::date) - GREATEST(trips.start_date, ?::date) + 1
+          ) as overlap_days
+        `, [trip.end_date, trip.start_date]),
+        knex.raw(`'traveler' as match_type`)
+      )
+      .where('trips.is_active', true)
+      .where('trips.is_public', true)
+      .where('users.is_active', true)
+      .whereNotIn('users.id', excludeIds)
+      .where('trips.start_date', '<=', trip.end_date)
+      .where('trips.end_date', '>=', trip.start_date)
+      .whereRaw(
+        `ST_DWithin(trips.destination_geom::geography, ?::geography, ?)`,
+        [trip.destination_geom, maxDistance * 1000]
+      )
+      .orderByRaw('overlap_days DESC, distance ASC')
+      .limit(Math.ceil(limit / 2));
+
+    const allCandidates = [...travelerCandidates, ...localCandidates];
+
+    const seen = new Set();
+    const uniqueCandidates = allCandidates.filter(c => {
+      if (seen.has(c.id)) return false;
+      seen.add(c.id);
+      return true;
+    });
+
+    return uniqueCandidates.slice(0, limit).map(user => {
+      delete user.password;
+      return user;
+    });
+  }
+
+  static calculateMatchScore(candidate, options = {}) {
+    const { tripStartDate, tripEndDate } = options;
+    let score = 1.0;
+
+    if (candidate.distance !== undefined) {
+      if (candidate.distance < 2) score *= 1.0;
+      else if (candidate.distance < 10) score *= 0.8;
+      else if (candidate.distance < 30) score *= 0.5;
+      else score *= 0.2;
+    }
+
+    if (candidate.overlap_days !== undefined && candidate.overlap_days > 0) {
+      if (candidate.overlap_days >= 7) score *= 1.0;
+      else if (candidate.overlap_days >= 3) score *= 0.8;
+      else score *= 0.5;
+    }
+
+    if (candidate.match_type === 'traveler') {
+      score *= 1.1;
+    }
+
+    if (candidate.is_guide) {
+      score *= 1.05;
+    }
+
+    return score;
   }
 }
 

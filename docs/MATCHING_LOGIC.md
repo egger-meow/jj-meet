@@ -1,5 +1,8 @@
 # Matching Logic — JJ-Meet
 
+> **Last Updated:** January 2026  
+> **Implementation:** `backend/src/services/swipe.service.js` → `getTripAwareDiscovery()`, `calculateMatchScore()`
+
 This document defines the conceptual and technical matching logic
 used by JJ-Meet, a travel-oriented dating application.
 
@@ -40,6 +43,16 @@ JJ-Meet intentionally avoids heavy interest-based or language-based filtering to
 ### 2.1 Spatial Dimension
 - Stored using PostGIS geography types
 - Queries use radius-based search (e.g., ST_DWithin)
+
+**Radius Strategy:**
+
+| Purpose | Radius | Notes |
+|---------|--------|-------|
+| Discovery (fetch) | 50km | Ensures sufficient candidate pool |
+| Rank boost | <10km | Strongly favored in ranking |
+| Meeting confidence | <5km | "High chance to meet" indicator |
+
+> While a default radius of 50km is used for initial candidate retrieval, ranking strongly favors closer proximity to encourage realistic meetups.
 
 Examples:
 - Nearby locals within X km

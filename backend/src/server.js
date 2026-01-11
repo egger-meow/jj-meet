@@ -13,6 +13,9 @@ const userRoutes = require('./routes/user.routes');
 const swipeRoutes = require('./routes/swipe.routes');
 const matchRoutes = require('./routes/match.routes');
 const messageRoutes = require('./routes/message.routes');
+const tripRoutes = require('./routes/trip.routes');
+const blockRoutes = require('./routes/block.routes');
+const reportRoutes = require('./routes/report.routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const { setupSocketHandlers } = require('./socket/socketHandlers');
 
@@ -49,6 +52,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/swipes', swipeRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/trips', tripRoutes);
+app.use('/api/blocks', blockRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

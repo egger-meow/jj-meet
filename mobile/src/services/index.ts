@@ -9,3 +9,4 @@ export { socketService } from './socketService';
 export { cameraService } from './cameraService';
 export { locationService } from './locationService';
 export { notificationService } from './notificationService';
+export { tripService } from './tripService';

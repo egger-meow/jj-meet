@@ -111,6 +111,20 @@ const setupTestDb = async () => {
     table.timestamp('created_at').defaultTo(db.fn.now());
   });
 
+  await db.schema.createTable('reports', (table) => {
+    table.uuid('id').primary().defaultTo(db.raw("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))"));
+    table.uuid('reporter_id').references('id').inTable('users').onDelete('CASCADE');
+    table.uuid('reported_id').references('id').inTable('users').onDelete('CASCADE');
+    table.string('reason').notNullable();
+    table.text('description');
+    table.string('status').defaultTo('pending');
+    table.uuid('reviewed_by').references('id').inTable('users').onDelete('SET NULL');
+    table.text('admin_notes');
+    table.string('action_taken');
+    table.timestamp('created_at').defaultTo(db.fn.now());
+    table.timestamp('reviewed_at');
+  });
+
   return db;
 };
 
@@ -127,6 +141,7 @@ const cleanTestDb = async () => {
   await db('matches').del();
   await db('swipes').del();
   await db('refresh_tokens').del();
+  await db('reports').del();
   await db('blocks').del();
   await db('users').del();
 };

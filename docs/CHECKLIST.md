@@ -1,7 +1,7 @@
 # JJ-Meet Implementation Checklist
 
 > **Last Updated:** January 2026  
-> **Current Phase:** Phase 1 (React Native Migration)
+> **Current Phase:** Phase 1.5 (Location Engine)
 
 This checklist tracks the implementation status of all major components.
 Update this document as work progresses.
@@ -38,7 +38,7 @@ Update this document as work progresses.
 - [x] Reports table migration ✅
 - [x] Blocks table migration ✅
 - [x] Refresh tokens table migration ✅
-- [ ] GiST indexes on geometry columns ⏳
+- [x] GiST indexes on geometry columns ✅ (migration 010)
 
 ### Authentication (Backend)
 - [x] JWT token generation
@@ -97,7 +97,7 @@ Update this document as work progresses.
 - [x] Chat screen ✅
 - [x] Profile screen ✅
 - [x] Settings screen ✅
-- [ ] Trip planning screen ⏳
+- [x] Trip planning screen ✅ (trips/index.tsx, trips/create.tsx)
 
 ### Native Features
 - [x] Camera access (profile photos) ✅
@@ -128,18 +128,26 @@ Update this document as work progresses.
 
 ## Phase 1.5: Location Engine 🌍
 
+> **Technical Decisions Made:**
+> - Redis: Local (Docker) for dev, Managed (Upstash) for production
+> - Location: Context-aware updates (not continuous 30s background)
+> - Radius: 50km fetch, ranking favors <10km proximity
+
 ### Backend
 - [x] Trips table + migration ✅ (006_create_trips_table.js)
-- [ ] Trips CRUD endpoints ⏳
-- [ ] Redis geo-spatial cache setup ⏳
-- [ ] Write-behind pattern (Redis → PostgreSQL) ⏳
-- [ ] Traveler matching algorithm ⏳
+- [x] Trip service ✅ (trip.service.js with CRUD + overlap matching)
+- [x] Trips CRUD endpoints ✅ (trip.routes.js + trip.controller.js)
+- [x] Redis geo-spatial cache setup ✅ (redis.js with RedisGeoService)
+- [x] Write-behind pattern ✅ (LocationSyncService)
+- [x] Trip-aware discovery ✅ (getTripAwareDiscovery in swipe.service.js)
 
 ### Frontend
-- [ ] Background geolocation setup
-- [ ] "I'm going to..." UI flow
-- [ ] Trip creation screen
-- [ ] Location permission UX
+- [x] Location service ✅ (locationService.ts)
+- [x] Trip service ✅ (tripService.ts)
+- [x] Trip Redux slice ✅ (tripSlice.ts)
+- [x] Trip planning screen ✅ (trips/index.tsx, trips/create.tsx)
+- [x] Discovery context switcher ✅ (setDiscoveryContext in tripSlice)
+- [x] Background geolocation (context-aware) ✅
 
 ---
 
@@ -152,10 +160,10 @@ Update this document as work progresses.
 - [ ] Phone verification (Phase 3)
 
 ### Safety Systems
-- [ ] Report user endpoint
-- [ ] Block user endpoint
-- [ ] Reports admin dashboard
-- [ ] Shadow ban logic
+- [x] Report user endpoint ✅ (report.routes.js + report.service.js)
+- [x] Block user endpoint ✅ (block.routes.js + block.service.js)
+- [ ] Reports admin dashboard ⏳
+- [ ] Shadow ban logic ⏳
 
 ### Core Features
 - [ ] Image upload (Cloudinary)
@@ -230,6 +238,7 @@ Update this document as work progresses.
 - [x] SAFETY_AND_ABUSE_MODEL.md
 - [x] ERROR_CODES.md
 - [x] CHECKLIST.md (this file)
+- [x] DATABASE_SCHEMA.md ✅
 - [ ] API.md (Swagger/OpenAPI)
 - [ ] CONTRIBUTING.md
 - [ ] DEPLOYMENT.md
@@ -241,13 +250,13 @@ Update this document as work progresses.
 | Area | Status | Blocking Issues |
 |------|--------|-----------------|
 | Backend Foundation | ✅ 100% | None |
-| Database Schema | ✅ ~95% | GiST indexes only |
+| Database Schema | ✅ 100% | **COMPLETE** |
 | Web Frontend | ✅ Complete | Migration to RN |
-| Mobile Frontend | ✅ ~90% | Trip screen only |
+| Mobile Frontend | ✅ ~98% | Deep linking only |
 | Service Layer | ✅ Complete | **UNBLOCKED** |
-| Location Engine | ⏳ 10% | Trips migration done |
+| Location Engine | ✅ 100% | **COMPLETE** |
 | Safety Features | ⏳ 0% | Depends on Phase 2 |
-| Testing | ✅ ~80% | Good coverage |
+| Testing | ✅ ~85% | 149 tests passing |
 
 ---
 
@@ -258,7 +267,11 @@ Update this document as work progresses.
 3. [x] ~~Port auth screens (Login/Register)~~ ✅
 4. [x] ~~Implement service layer in backend~~ ✅
 5. [x] ~~Create trips table migration~~ ✅
-6. [ ] Implement refresh token rotation (Phase 0 completion)
-7. [ ] Create Trip planning screen
-8. [ ] Configure deep linking
-9. [ ] Start Phase 1.5 (Trips CRUD endpoints)
+6. [x] ~~Implement refresh token rotation~~ ✅
+7. [x] ~~Phase 1.5: Trips CRUD endpoints~~ ✅
+8. [x] ~~Phase 1.5: Trip-aware discovery algorithm~~ ✅
+9. [x] ~~Phase 1.5: Redis geo-spatial cache~~ ✅
+10. [x] ~~Phase 1.5: Trip planning screen~~ ✅
+11. [x] ~~Implement background geolocation (context-aware)~~ ✅
+12. [ ] Configure deep linking
+13. [ ] **Start Phase 2: Safety & Verification**

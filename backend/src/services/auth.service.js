@@ -25,7 +25,22 @@ class AuthService {
   }
 
   static async register(userData) {
-    const { email, password, name, birth_date, user_type, gender, social_link } = userData;
+    const { 
+      email, 
+      password, 
+      name, 
+      birth_date, 
+      user_type, 
+      gender, 
+      social_link,
+      bio,
+      is_guide,
+      has_car,
+      has_motorcycle,
+      speaks_english,
+      speaks_local,
+      flexible_schedule
+    } = userData;
 
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
@@ -35,15 +50,25 @@ class AuthService {
       throw error;
     }
 
-    const user = await User.create({
+    const createData = {
       email,
       password,
       name,
       birth_date,
-      user_type: user_type || 'tourist',
+      user_type: user_type || 'both',
       gender,
-      social_link
-    });
+    };
+
+    if (social_link !== undefined) createData.social_link = social_link;
+    if (bio !== undefined) createData.bio = bio;
+    if (is_guide !== undefined) createData.is_guide = is_guide;
+    if (has_car !== undefined) createData.has_car = has_car;
+    if (has_motorcycle !== undefined) createData.has_motorcycle = has_motorcycle;
+    if (speaks_english !== undefined) createData.speaks_english = speaks_english;
+    if (speaks_local !== undefined) createData.speaks_local = speaks_local;
+    if (flexible_schedule !== undefined) createData.flexible_schedule = flexible_schedule;
+
+    const user = await User.create(createData);
 
     return user;
   }

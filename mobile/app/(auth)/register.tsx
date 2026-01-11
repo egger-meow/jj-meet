@@ -16,8 +16,6 @@ import { Input, Button } from '../../src/components/ui';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 
-type UserType = 'tourist' | 'local' | 'both';
-
 export default function RegisterScreen() {
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector((state) => state.auth);
@@ -30,10 +28,13 @@ export default function RegisterScreen() {
     name: '',
     birth_date: '',
     gender: '',
-    user_type: 'tourist' as UserType,
-    is_guide: false,
+    user_type: 'both',
+    is_guide: true,
     has_car: false,
     has_motorcycle: false,
+    speaks_english: false,
+    speaks_local: false,
+    flexible_schedule: false,
     bio: '',
     social_link: '',
   });
@@ -193,55 +194,43 @@ export default function RegisterScreen() {
   const renderStep3 = () => (
     <View style={styles.stepContent}>
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>I am a</Text>
-        <View style={styles.typeButtons}>
-          {(['tourist', 'local', 'both'] as UserType[]).map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={[
-                styles.typeButton,
-                formData.user_type === type && styles.typeButtonActive,
-              ]}
-              onPress={() => updateFormData('user_type', type)}
-            >
-              <Feather
-                name={type === 'tourist' ? 'map-pin' : type === 'local' ? 'home' : 'globe'}
-                size={20}
-                color={formData.user_type === type ? '#FF6B6B' : '#6B7280'}
-              />
-              <Text
-                style={[
-                  styles.typeButtonText,
-                  formData.user_type === type && styles.typeButtonTextActive,
-                ]}
-              >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <Text style={styles.sectionLabel}>About Me</Text>
+        <Text style={styles.sectionHint}>
+          Help others know what you can offer when meeting up
+        </Text>
+        
+        <View style={styles.characteristicsGrid}>
+          <CheckboxItem
+            label="I have a car"
+            checked={formData.has_car}
+            onToggle={() => updateFormData('has_car', !formData.has_car)}
+            icon="truck"
+          />
+          <CheckboxItem
+            label="I have a motorcycle"
+            checked={formData.has_motorcycle}
+            onToggle={() => updateFormData('has_motorcycle', !formData.has_motorcycle)}
+            icon="zap"
+          />
+          <CheckboxItem
+            label="I speak English"
+            checked={formData.speaks_english}
+            onToggle={() => updateFormData('speaks_english', !formData.speaks_english)}
+            icon="globe"
+          />
+          <CheckboxItem
+            label="I speak local language"
+            checked={formData.speaks_local}
+            onToggle={() => updateFormData('speaks_local', !formData.speaks_local)}
+            icon="message-circle"
+          />
+          <CheckboxItem
+            label="Flexible schedule"
+            checked={formData.flexible_schedule}
+            onToggle={() => updateFormData('flexible_schedule', !formData.flexible_schedule)}
+            icon="clock"
+          />
         </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Options</Text>
-        <CheckboxItem
-          label="I can be a local guide"
-          checked={formData.is_guide}
-          onToggle={() => updateFormData('is_guide', !formData.is_guide)}
-          icon="compass"
-        />
-        <CheckboxItem
-          label="I have a car"
-          checked={formData.has_car}
-          onToggle={() => updateFormData('has_car', !formData.has_car)}
-          icon="truck"
-        />
-        <CheckboxItem
-          label="I have a motorcycle"
-          checked={formData.has_motorcycle}
-          onToggle={() => updateFormData('has_motorcycle', !formData.has_motorcycle)}
-          icon="zap"
-        />
       </View>
 
       <Input
@@ -364,7 +353,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#374151',
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  sectionHint: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 16,
+  },
+  characteristicsGrid: {
+    gap: 4,
   },
   genderSection: { marginBottom: 16 },
   genderButtons: { flexDirection: 'row', gap: 8 },
