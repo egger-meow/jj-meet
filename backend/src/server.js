@@ -16,8 +16,11 @@ const messageRoutes = require('./routes/message.routes');
 const tripRoutes = require('./routes/trip.routes');
 const blockRoutes = require('./routes/block.routes');
 const reportRoutes = require('./routes/report.routes');
+const verificationRoutes = require('./routes/verification.routes');
+const adminRoutes = require('./routes/admin.routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const { setupSocketHandlers } = require('./socket/socketHandlers');
+const { createPubSubClients } = require('./config/redis');
 
 const app = express();
 const server = createServer(app);
@@ -27,6 +30,17 @@ const io = new Server(server, {
     credentials: true
   }
 });
+
+if (process.env.REDIS_URL || process.env.REDIS_HOST) {
+  try {
+    const { createAdapter } = require('@socket.io/redis-adapter');
+    const { pubClient, subClient } = createPubSubClients();
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log('✅ Socket.io Redis adapter enabled');
+  } catch (error) {
+    console.warn('⚠️ Socket.io Redis adapter not available:', error.message);
+  }
+}
 
 // Rate limiting
 const limiter = rateLimit({
@@ -55,6 +69,8 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/blocks', blockRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/verification', verificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

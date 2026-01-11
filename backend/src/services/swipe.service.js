@@ -1,5 +1,6 @@
 const knex = require('../config/database');
 const MatchService = require('./match.service');
+const ModerationService = require('./moderation.service');
 
 class SwipeService {
   static SWIPE_DIRECTIONS = {
@@ -181,8 +182,9 @@ class SwipeService {
       .pluck('swiped_id');
 
     const blockedUserIds = await this.getBlockedUserIds(userId);
+    const shadowBannedUserIds = await ModerationService.getShadowBannedUserIds();
 
-    const excludeIds = [...new Set([userId, ...swipedUserIds, ...blockedUserIds])];
+    const excludeIds = [...new Set([userId, ...swipedUserIds, ...blockedUserIds, ...shadowBannedUserIds])];
 
     let query = knex('users')
       .select(
@@ -193,6 +195,7 @@ class SwipeService {
         )
       )
       .where('is_active', true)
+      .where('is_banned', false)
       .whereNotIn('id', excludeIds)
       .whereRaw(
         `ST_DWithin(location::geography, ?::geography, ?)`,

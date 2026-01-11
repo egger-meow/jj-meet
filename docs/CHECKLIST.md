@@ -154,25 +154,29 @@ Update this document as work progresses.
 ## Phase 2: Core Features + Safety 🛡️
 
 ### Verification
-- [ ] Selfie verification (AWS Rekognition)
-- [ ] Social media link validation
-- [ ] Email verification
+- [x] Selfie verification (AWS Rekognition) ✅ (verification.service.js + POST /api/verification/selfie)
+- [x] Social media link validation ✅ (validation.service.js)
+- [x] Email verification ✅ (email.service.js + verification.routes.js)
 - [ ] Phone verification (Phase 3)
+
+### Documentation
+- [x] Environment setup guide ✅ (docs/ENVIRONMENT_SETUP.md)
+- [x] Updated .env.example with all required variables
 
 ### Safety Systems
 - [x] Report user endpoint ✅ (report.routes.js + report.service.js)
 - [x] Block user endpoint ✅ (block.routes.js + block.service.js)
-- [ ] Reports admin dashboard ⏳
-- [ ] Shadow ban logic ⏳
+- [x] Reports admin dashboard ✅ (admin.routes.js + admin.controller.js)
+- [x] Shadow ban logic ✅ (moderation.service.js + shadowBan.js middleware)
 
 ### Core Features
-- [ ] Image upload (Cloudinary)
-- [ ] Real-time chat (Socket.io)
-- [ ] Socket.io Redis adapter
-- [ ] Swipe animations
-- [ ] Profile photo management
-- [ ] Local guide toggle
-- [ ] Transportation badges
+- [x] Image upload (Cloudinary) ✅ (upload.service.js - already existed)
+- [x] Real-time chat (Socket.io) ✅ (socketHandlers.js - already existed)
+- [x] Socket.io Redis adapter ✅ (server.js + redis.js)
+- [x] Swipe animations ✅ (SwipeCard.tsx + discover screen)
+- [x] Profile photo management ✅ (PhotoGrid.tsx + edit-profile.tsx)
+- [x] Local guide toggle ✅ (edit-profile.tsx)
+- [x] Transportation badges ✅ (edit-profile.tsx + SwipeCard.tsx)
 
 ---
 
@@ -255,8 +259,9 @@ Update this document as work progresses.
 | Mobile Frontend | ✅ ~98% | Deep linking only |
 | Service Layer | ✅ Complete | **UNBLOCKED** |
 | Location Engine | ✅ 100% | **COMPLETE** |
-| Safety Features | ⏳ 0% | Depends on Phase 2 |
-| Testing | ✅ ~85% | 149 tests passing |
+| Safety Features | ✅ 100% | **COMPLETE** |
+| Phase 2 Features | ✅ 100% | **COMPLETE** |
+| Testing | ✅ ~90% | 186 tests passing |
 
 ---
 

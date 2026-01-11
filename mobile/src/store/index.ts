@@ -4,6 +4,7 @@ import matchesReducer from './slices/matchesSlice';
 import chatReducer from './slices/chatSlice';
 import userReducer from './slices/userSlice';
 import tripReducer from './slices/tripSlice';
+import discoveryReducer from './slices/discoverySlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     chat: chatReducer,
     user: userReducer,
     trips: tripReducer,
+    discovery: discoveryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

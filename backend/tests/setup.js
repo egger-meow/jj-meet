@@ -50,6 +50,16 @@ const setupTestDb = async () => {
     table.timestamp('last_active').defaultTo(db.fn.now());
     table.timestamp('created_at').defaultTo(db.fn.now());
     table.timestamp('updated_at').defaultTo(db.fn.now());
+    table.boolean('is_shadow_banned').defaultTo(false);
+    table.string('shadow_ban_reason');
+    table.timestamp('shadow_ban_until');
+    table.boolean('is_banned').defaultTo(false);
+    table.string('ban_reason');
+    table.timestamp('banned_at');
+    table.boolean('email_verified').defaultTo(false);
+    table.boolean('is_verified').defaultTo(false);
+    table.string('verification_photo');
+    table.timestamp('verified_at');
   });
 
   await db.schema.createTable('swipes', (table) => {
@@ -125,6 +135,17 @@ const setupTestDb = async () => {
     table.timestamp('reviewed_at');
   });
 
+  await db.schema.createTable('verification_tokens', (table) => {
+    table.uuid('id').primary().defaultTo(db.raw("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))"));
+    table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
+    table.string('token').notNullable();
+    table.string('type').notNullable();
+    table.timestamp('expires_at').notNullable();
+    table.boolean('is_used').defaultTo(false);
+    table.timestamp('used_at');
+    table.timestamp('created_at').defaultTo(db.fn.now());
+  });
+
   return db;
 };
 
@@ -141,6 +162,7 @@ const cleanTestDb = async () => {
   await db('matches').del();
   await db('swipes').del();
   await db('refresh_tokens').del();
+  await db('verification_tokens').del();
   await db('reports').del();
   await db('blocks').del();
   await db('users').del();

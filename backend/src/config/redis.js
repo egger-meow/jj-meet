@@ -201,10 +201,21 @@ class LocationSyncService {
   }
 }
 
+const createPubSubClients = () => {
+  const pubClient = process.env.REDIS_URL 
+    ? new Redis(process.env.REDIS_URL)
+    : new Redis(redisConfig);
+  
+  const subClient = pubClient.duplicate();
+  
+  return { pubClient, subClient };
+};
+
 module.exports = {
   redis,
   RedisGeoService,
   LocationSyncService,
   GEO_KEY,
   LOCATION_BATCH_KEY,
+  createPubSubClients,
 };
