@@ -93,4 +93,14 @@ router.post(
   adminController.revokeVerification
 );
 
+router.get(
+  '/users/:userId/moderation-history',
+  [param('userId').isUUID().withMessage('Valid user ID is required')],
+  adminController.getUserModerationHistory
+);
+
+router.get('/logs', adminController.getModerationLogs);
+
+router.get('/analytics', adminController.getModerationAnalytics);
+
 module.exports = router;

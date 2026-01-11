@@ -18,6 +18,9 @@ const blockRoutes = require('./routes/block.routes');
 const reportRoutes = require('./routes/report.routes');
 const verificationRoutes = require('./routes/verification.routes');
 const adminRoutes = require('./routes/admin.routes');
+const reviewRoutes = require('./routes/review.routes');
+const meetingRoutes = require('./routes/meeting.routes');
+const emergencyRoutes = require('./routes/emergency.routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const { setupSocketHandlers } = require('./socket/socketHandlers');
 const { createPubSubClients } = require('./config/redis');
@@ -71,6 +74,9 @@ app.use('/api/blocks', blockRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/meetings', meetingRoutes);
+app.use('/api/emergency', emergencyRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

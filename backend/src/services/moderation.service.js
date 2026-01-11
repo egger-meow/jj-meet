@@ -202,8 +202,100 @@ class ModerationService {
     return { action: 'none', reportCount: count };
   }
 
-  static async logModerationAction(userId, action, reason, adminId) {
-    console.log(`[MODERATION] User ${userId}: ${action} - ${reason || 'N/A'} by ${adminId || 'system'}`);
+  static async logModerationAction(targetUserId, action, reason, adminId, metadata = {}) {
+    await knex('moderation_logs').insert({
+      admin_id: adminId,
+      target_user_id: targetUserId,
+      action,
+      reason,
+      metadata: JSON.stringify(metadata),
+    });
+    console.log(`[MODERATION] User ${targetUserId}: ${action} - ${reason || 'N/A'} by ${adminId || 'system'}`);
+  }
+
+  static async getModerationLogs(options = {}) {
+    const { userId, adminId, action, limit = 50, offset = 0 } = options;
+
+    let query = knex('moderation_logs')
+      .leftJoin('users as admin', 'moderation_logs.admin_id', 'admin.id')
+      .leftJoin('users as target', 'moderation_logs.target_user_id', 'target.id')
+      .select(
+        'moderation_logs.*',
+        'admin.name as admin_name',
+        'admin.email as admin_email',
+        'target.name as target_name',
+        'target.email as target_email'
+      )
+      .orderBy('moderation_logs.created_at', 'desc');
+
+    if (userId) query = query.where('moderation_logs.target_user_id', userId);
+    if (adminId) query = query.where('moderation_logs.admin_id', adminId);
+    if (action) query = query.where('moderation_logs.action', action);
+
+    return query.limit(limit).offset(offset);
+  }
+
+  static async getUserModerationHistory(userId) {
+    const logs = await knex('moderation_logs')
+      .where({ target_user_id: userId })
+      .orderBy('created_at', 'desc');
+
+    const reports = await knex('reports')
+      .where({ reported_id: userId })
+      .select('id', 'reason', 'status', 'created_at')
+      .orderBy('created_at', 'desc');
+
+    return { logs, reports };
+  }
+
+  static async getAnalytics(days = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const actionCounts = await knex('moderation_logs')
+      .where('created_at', '>=', startDate)
+      .groupBy('action')
+      .select('action')
+      .count('* as count');
+
+    const reportsByStatus = await knex('reports')
+      .where('created_at', '>=', startDate)
+      .groupBy('status')
+      .select('status')
+      .count('* as count');
+
+    const reportsByReason = await knex('reports')
+      .where('created_at', '>=', startDate)
+      .groupBy('reason')
+      .select('reason')
+      .count('* as count');
+
+    const dailyActions = await knex('moderation_logs')
+      .where('created_at', '>=', startDate)
+      .select(knex.raw("DATE(created_at) as date"))
+      .count('* as count')
+      .groupBy(knex.raw("DATE(created_at)"))
+      .orderBy('date', 'asc');
+
+    const bannedUsers = await knex('users')
+      .where('is_banned', true)
+      .count('* as count')
+      .first();
+
+    const shadowBannedUsers = await knex('users')
+      .where('is_shadow_banned', true)
+      .count('* as count')
+      .first();
+
+    return {
+      period_days: days,
+      action_counts: actionCounts,
+      reports_by_status: reportsByStatus,
+      reports_by_reason: reportsByReason,
+      daily_actions: dailyActions,
+      current_banned: parseInt(bannedUsers.count) || 0,
+      current_shadow_banned: parseInt(shadowBannedUsers.count) || 0,
+    };
   }
 
   static getShadowBanReasons() {

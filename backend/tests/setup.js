@@ -60,6 +60,8 @@ const setupTestDb = async () => {
     table.boolean('is_verified').defaultTo(false);
     table.string('verification_photo');
     table.timestamp('verified_at');
+    table.float('rating').defaultTo(0);
+    table.integer('rating_count').defaultTo(0);
   });
 
   await db.schema.createTable('swipes', (table) => {
@@ -146,6 +148,27 @@ const setupTestDb = async () => {
     table.timestamp('created_at').defaultTo(db.fn.now());
   });
 
+  await db.schema.createTable('reviews', (table) => {
+    table.uuid('id').primary().defaultTo(db.raw("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))"));
+    table.uuid('reviewer_id').references('id').inTable('users').onDelete('CASCADE');
+    table.uuid('reviewed_id').references('id').inTable('users').onDelete('CASCADE');
+    table.integer('rating').notNullable();
+    table.text('comment');
+    table.boolean('is_guide_review').defaultTo(false);
+    table.timestamp('created_at').defaultTo(db.fn.now());
+    table.unique(['reviewer_id', 'reviewed_id']);
+  });
+
+  await db.schema.createTable('moderation_logs', (table) => {
+    table.uuid('id').primary().defaultTo(db.raw("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))"));
+    table.uuid('admin_id').references('id').inTable('users').onDelete('SET NULL');
+    table.uuid('target_user_id').references('id').inTable('users').onDelete('CASCADE');
+    table.string('action').notNullable();
+    table.string('reason');
+    table.json('metadata');
+    table.timestamp('created_at').defaultTo(db.fn.now());
+  });
+
   return db;
 };
 
@@ -158,6 +181,8 @@ const teardownTestDb = async () => {
 
 const cleanTestDb = async () => {
   const db = createTestDb();
+  await db('moderation_logs').del();
+  await db('reviews').del();
   await db('messages').del();
   await db('matches').del();
   await db('swipes').del();

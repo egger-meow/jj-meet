@@ -182,11 +182,11 @@ Update this document as work progresses.
 
 ## Phase 3: Trust & Polish
 
-- [ ] Review/rating system
-- [ ] Guide-specific profile fields
-- [ ] Meeting location suggestions
-- [ ] Emergency contact feature
-- [ ] Enhanced moderation tools
+- [x] Review/rating system ✅ (review.service.js + review.routes.js)
+- [x] Guide-specific profile fields ✅ (migration 014 + user.service.js)
+- [x] Meeting location suggestions ✅ (meeting.service.js + meeting.routes.js)
+- [x] Emergency contact feature ✅ (emergency.service.js + emergency.routes.js)
+- [x] Enhanced moderation tools ✅ (moderation_logs + analytics endpoints)
 
 ---
 

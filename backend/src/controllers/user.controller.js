@@ -87,3 +87,41 @@ exports.getDiscoveryCandidates = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.updateGuideProfile = async (req, res, next) => {
+  try {
+    const user = await UserService.updateGuideProfile(req.userId, req.body);
+    res.json({ success: true, data: user, message: 'Guide profile updated' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getGuideProfile = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const guide = await UserService.getGuideProfile(userId);
+    res.json({ success: true, data: guide });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.searchGuides = async (req, res, next) => {
+  try {
+    const { city, specialties, minRating, maxRate, limit, offset } = req.query;
+    
+    const guides = await UserService.searchGuides({
+      city,
+      specialties: specialties ? specialties.split(',') : undefined,
+      minRating: minRating ? parseFloat(minRating) : undefined,
+      maxRate: maxRate ? parseFloat(maxRate) : undefined,
+      limit: parseInt(limit) || 20,
+      offset: parseInt(offset) || 0,
+    });
+
+    res.json({ success: true, data: guides });
+  } catch (error) {
+    next(error);
+  }
+};

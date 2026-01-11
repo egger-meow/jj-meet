@@ -106,6 +106,95 @@ class UserService {
     return User.updateProfile(userId, updates);
   }
 
+  static async updateGuideProfile(userId, guideData) {
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      error.code = 'USER_NOT_FOUND';
+      throw error;
+    }
+
+    const allowedGuideFields = [
+      'guide_specialties', 'guide_availability', 'hourly_rate',
+      'guide_description', 'years_experience', 'tour_types',
+      'guide_city', 'guide_languages'
+    ];
+
+    const updates = { is_guide: true };
+    for (const field of allowedGuideFields) {
+      if (guideData[field] !== undefined) {
+        updates[field] = guideData[field];
+      }
+    }
+
+    const [updatedUser] = await knex('users')
+      .where({ id: userId })
+      .update(updates)
+      .returning('*');
+
+    delete updatedUser.password;
+    return updatedUser;
+  }
+
+  static async getGuideProfile(userId) {
+    const user = await knex('users')
+      .where({ id: userId })
+      .select(
+        'id', 'name', 'profile_photo', 'bio', 'is_guide',
+        'guide_specialties', 'guide_availability', 'hourly_rate',
+        'guide_description', 'years_experience', 'tour_types',
+        'guide_city', 'guide_languages', 'guide_verified_at',
+        'rating', 'rating_count', 'is_verified'
+      )
+      .first();
+
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      error.code = 'USER_NOT_FOUND';
+      throw error;
+    }
+
+    return user;
+  }
+
+  static async searchGuides(options = {}) {
+    const { city, specialties, minRating, maxRate, limit = 20, offset = 0 } = options;
+
+    let query = knex('users')
+      .where('is_guide', true)
+      .where('is_active', true)
+      .select(
+        'id', 'name', 'profile_photo', 'bio',
+        'guide_specialties', 'hourly_rate', 'guide_city',
+        'years_experience', 'rating', 'rating_count', 'is_verified'
+      );
+
+    if (city) {
+      query = query.whereRaw('LOWER(guide_city) = LOWER(?)', [city]);
+    }
+
+    if (specialties && specialties.length > 0) {
+      query = query.whereRaw('guide_specialties && ?', [specialties]);
+    }
+
+    if (minRating) {
+      query = query.where('rating', '>=', minRating);
+    }
+
+    if (maxRate) {
+      query = query.where('hourly_rate', '<=', maxRate);
+    }
+
+    const guides = await query
+      .orderBy('rating', 'desc')
+      .limit(limit)
+      .offset(offset);
+
+    return guides;
+  }
+
   static async deactivateAccount(userId) {
     await knex('users')
       .where({ id: userId })

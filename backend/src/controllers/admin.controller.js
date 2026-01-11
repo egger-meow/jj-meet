@@ -348,6 +348,44 @@ const revokeVerification = async (req, res, next) => {
   }
 };
 
+const getModerationLogs = async (req, res, next) => {
+  try {
+    const { userId, adminId, action, limit, offset } = req.query;
+
+    const logs = await ModerationService.getModerationLogs({
+      userId,
+      adminId,
+      action,
+      limit: parseInt(limit) || 50,
+      offset: parseInt(offset) || 0,
+    });
+
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getUserModerationHistory = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const history = await ModerationService.getUserModerationHistory(userId);
+    res.json({ success: true, data: history });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getModerationAnalytics = async (req, res, next) => {
+  try {
+    const { days } = req.query;
+    const analytics = await ModerationService.getAnalytics(parseInt(days) || 30);
+    res.json({ success: true, data: analytics });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getReports,
@@ -360,4 +398,7 @@ module.exports = {
   shadowBanUser,
   removeShadowBan,
   revokeVerification,
+  getModerationLogs,
+  getUserModerationHistory,
+  getModerationAnalytics,
 };
