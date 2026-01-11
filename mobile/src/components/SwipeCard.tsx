@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { t } from '../i18n';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -125,15 +126,15 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({ user, onSwipe, isFirst }) 
           )}
           
           <Animated.View style={[styles.overlayLabel, styles.likeLabel, likeOpacity]}>
-            <Text style={styles.likeLabelText}>LIKE</Text>
+            <Text style={styles.likeLabelText}>喜歡</Text>
           </Animated.View>
           
           <Animated.View style={[styles.overlayLabel, styles.nopeLabel, nopeOpacity]}>
-            <Text style={styles.nopeLabelText}>NOPE</Text>
+            <Text style={styles.nopeLabelText}>跳過</Text>
           </Animated.View>
           
           <Animated.View style={[styles.overlayLabel, styles.superLikeLabel, superLikeOpacity]}>
-            <Text style={styles.superLikeLabelText}>SUPER LIKE</Text>
+            <Text style={styles.superLikeLabelText}>超級喜歡</Text>
           </Animated.View>
 
           <View style={styles.gradient} />
@@ -152,7 +153,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({ user, onSwipe, isFirst }) 
             {user.distance !== undefined && (
               <View style={styles.distanceRow}>
                 <Feather name="map-pin" size={14} color="#FFFFFF" />
-                <Text style={styles.distance}>{Math.round(user.distance)} km away</Text>
+                <Text style={styles.distance}>{Math.round(user.distance)} 公里</Text>
               </View>
             )}
             
@@ -160,19 +161,19 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({ user, onSwipe, isFirst }) 
               {user.is_guide && (
                 <View style={styles.badge}>
                   <Feather name="compass" size={12} color="#FF6B6B" />
-                  <Text style={styles.badgeText}>Guide</Text>
+                  <Text style={styles.badgeText}>{t.swipeCard.guide}</Text>
                 </View>
               )}
               {user.has_car && (
                 <View style={styles.badge}>
                   <Feather name="truck" size={12} color="#3B82F6" />
-                  <Text style={styles.badgeText}>Car</Text>
+                  <Text style={styles.badgeText}>{t.swipeCard.hasCar}</Text>
                 </View>
               )}
               {user.has_motorcycle && (
                 <View style={styles.badge}>
                   <Feather name="zap" size={12} color="#F59E0B" />
-                  <Text style={styles.badgeText}>Moto</Text>
+                  <Text style={styles.badgeText}>{t.swipeCard.hasMotorcycle}</Text>
                 </View>
               )}
             </View>

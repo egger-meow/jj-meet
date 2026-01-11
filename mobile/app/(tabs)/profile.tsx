@@ -13,6 +13,7 @@ import { router } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../src/store/hooks';
 import { logout } from '../../src/store/slices/authSlice';
 import { Button } from '../../src/components/ui';
+import { t } from '../../src/i18n';
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -26,7 +27,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.title}>{t.profile.title}</Text>
         <TouchableOpacity onPress={() => router.push('/settings')}>
           <Feather name="settings" size={24} color="#6B7280" />
         </TouchableOpacity>
@@ -54,7 +55,7 @@ export default function ProfileScreen() {
             {user?.is_guide && (
               <View style={[styles.badge, styles.guideBadge]}>
                 <Feather name="compass" size={14} color="#FF6B6B" />
-                <Text style={styles.guideBadgeText}>Local Guide</Text>
+                <Text style={styles.guideBadgeText}>{t.profile.localGuide}</Text>
               </View>
             )}
             {user?.has_car && (
@@ -71,22 +72,22 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bio</Text>
+          <Text style={styles.sectionTitle}>{t.profile.title === '我的檔案' ? '自我介紹' : 'Bio'}</Text>
           <Text style={styles.bioText}>
-            {user?.bio || 'No bio yet. Tap to add one!'}
+            {user?.bio || t.profile.noBioYet}
           </Text>
         </View>
 
         <View style={styles.menuSection}>
-          <MenuItem icon="edit-2" label="Edit Profile" onPress={() => {}} />
-          <MenuItem icon="image" label="Manage Photos" onPress={() => {}} />
-          <MenuItem icon="shield" label="Verification" onPress={() => {}} />
-          <MenuItem icon="bell" label="Notifications" onPress={() => {}} />
+          <MenuItem icon="edit-2" label={t.profile.editProfile} onPress={() => {}} />
+          <MenuItem icon="image" label={t.profile.managePhotos} onPress={() => {}} />
+          <MenuItem icon="shield" label={t.profile.verification} onPress={() => {}} />
+          <MenuItem icon="bell" label={t.profile.notifications} onPress={() => {}} />
         </View>
 
         <View style={styles.logoutSection}>
           <Button
-            title="Log Out"
+            title={t.profile.logOut}
             onPress={handleLogout}
             variant="outline"
             size="large"

@@ -13,6 +13,7 @@ import { Stack, router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../src/store/hooks';
 import { logout } from '../src/store/slices/authSlice';
+import { t } from '../src/i18n';
 
 export default function SettingsScreen() {
   const dispatch = useAppDispatch();
@@ -24,12 +25,12 @@ export default function SettingsScreen() {
 
   const handleLogout = () => {
     Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out?',
+      t.profile.logOut,
+      t.settings.logOutConfirm,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t.common.cancel, style: 'cancel' },
         {
-          text: 'Log Out',
+          text: t.profile.logOut,
           style: 'destructive',
           onPress: async () => {
             await dispatch(logout());
@@ -42,15 +43,15 @@ export default function SettingsScreen() {
 
   const handleDeactivate = () => {
     Alert.alert(
-      'Deactivate Account',
-      'Your profile will be hidden from other users. You can reactivate anytime by logging in.',
+      t.settings.deactivateAccount,
+      t.settings.deactivateConfirm,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t.common.cancel, style: 'cancel' },
         {
-          text: 'Deactivate',
+          text: t.settings.deactivateAccount,
           style: 'destructive',
           onPress: () => {
-            Alert.alert('Account Deactivated', 'Your account has been deactivated.');
+            Alert.alert(t.alerts.success, t.settings.deactivateAccount);
           },
         },
       ]
@@ -59,16 +60,16 @@ export default function SettingsScreen() {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. All your data will be permanently deleted.',
+      t.settings.deleteAccount,
+      t.settings.deleteConfirm,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t.common.cancel, style: 'cancel' },
         {
-          text: 'Delete',
+          text: t.common.delete,
           style: 'destructive',
           onPress: () => {
-            Alert.alert('Confirm Deletion', 'Type DELETE to confirm', [
-              { text: 'Cancel', style: 'cancel' },
+            Alert.alert(t.common.confirm, t.settings.deleteConfirm, [
+              { text: t.common.cancel, style: 'cancel' },
             ]);
           },
         },
@@ -78,99 +79,99 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: 'Settings', headerShown: true }} />
+      <Stack.Screen options={{ title: t.settings.title, headerShown: true }} />
       
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
+          <Text style={styles.sectionTitle}>{t.settings.account}</Text>
           <SettingsItem
             icon="user"
-            label="Edit Profile"
+            label={t.profile.editProfile}
             onPress={() => {}}
           />
           <SettingsItem
             icon="lock"
-            label="Change Password"
+            label={t.settings.changePassword}
             onPress={() => {}}
           />
           <SettingsItem
             icon="shield"
-            label="Privacy & Safety"
+            label={t.settings.privacySafety}
             onPress={() => {}}
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
+          <Text style={styles.sectionTitle}>{t.settings.notifications}</Text>
           <SettingsToggle
             icon="bell"
-            label="Push Notifications"
+            label={t.settings.pushNotifications}
             value={notifications}
             onToggle={setNotifications}
           />
           <SettingsItem
             icon="mail"
-            label="Email Preferences"
+            label={t.settings.emailPreferences}
             onPress={() => {}}
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Discovery</Text>
+          <Text style={styles.sectionTitle}>{t.settings.discovery}</Text>
           <SettingsToggle
             icon="map-pin"
-            label="Location Services"
+            label={t.settings.locationServices}
             value={locationEnabled}
             onToggle={setLocationEnabled}
           />
           <SettingsToggle
             icon="navigation"
-            label="Show Distance"
+            label={t.settings.showDistance}
             value={showDistance}
             onToggle={setShowDistance}
           />
           <SettingsItem
             icon="sliders"
-            label="Discovery Preferences"
+            label={t.settings.discoveryPreferences}
             onPress={() => {}}
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support</Text>
+          <Text style={styles.sectionTitle}>{t.settings.support}</Text>
           <SettingsItem
             icon="help-circle"
-            label="Help Center"
+            label={t.settings.helpCenter}
             onPress={() => {}}
           />
           <SettingsItem
             icon="message-square"
-            label="Contact Us"
+            label={t.settings.contactUs}
             onPress={() => {}}
           />
           <SettingsItem
             icon="file-text"
-            label="Terms of Service"
+            label={t.settings.termsOfService}
             onPress={() => {}}
           />
           <SettingsItem
             icon="shield"
-            label="Privacy Policy"
+            label={t.settings.privacyPolicy}
             onPress={() => {}}
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Actions</Text>
+          <Text style={styles.sectionTitle}>{t.settings.accountActions}</Text>
           <SettingsItem
             icon="pause-circle"
-            label="Deactivate Account"
+            label={t.settings.deactivateAccount}
             onPress={handleDeactivate}
             danger
           />
           <SettingsItem
             icon="trash-2"
-            label="Delete Account"
+            label={t.settings.deleteAccount}
             onPress={handleDeleteAccount}
             danger
           />
@@ -178,10 +179,10 @@ export default function SettingsScreen() {
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Feather name="log-out" size={20} color="#EF4444" />
-          <Text style={styles.logoutText}>Log Out</Text>
+          <Text style={styles.logoutText}>{t.profile.logOut}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>Version 1.0.0</Text>
+        <Text style={styles.version}>{t.settings.version} 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

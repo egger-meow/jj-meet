@@ -18,6 +18,7 @@ import {
   setDiscoveryTripId,
 } from '../../src/store/slices/tripSlice';
 import { tripService, Trip } from '../../src/services/tripService';
+import { t } from '../../src/i18n';
 
 export default function TripsScreen() {
   const router = useRouter();
@@ -78,7 +79,7 @@ export default function TripsScreen() {
           {isDiscoveryContext && (
             <View style={styles.discoveryBadge}>
               <Ionicons name="compass" size={14} color="#fff" />
-              <Text style={styles.discoveryBadgeText}>Discovering</Text>
+              <Text style={styles.discoveryBadgeText}>{t.trips.discovering}</Text>
             </View>
           )}
         </View>
@@ -90,19 +91,19 @@ export default function TripsScreen() {
         <View style={styles.tripMeta}>
           <View style={styles.metaItem}>
             <Ionicons name="calendar-outline" size={14} color="#6B7280" />
-            <Text style={styles.metaText}>{duration} days</Text>
+            <Text style={styles.metaText}>{duration} {t.trips.days}</Text>
           </View>
           {isUpcoming && daysUntil > 0 && (
             <View style={styles.metaItem}>
               <Ionicons name="time-outline" size={14} color="#6B7280" />
               <Text style={styles.metaText}>
-                {daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`}
+                {daysUntil === 1 ? t.trips.tomorrow : t.trips.inDays.replace('{days}', String(daysUntil))}
               </Text>
             </View>
           )}
           {isActive && (
             <View style={[styles.statusBadge, styles.activeBadge]}>
-              <Text style={styles.statusText}>Active Now</Text>
+              <Text style={styles.statusText}>{t.trips.activeNow}</Text>
             </View>
           )}
           {trip.travel_style && (
@@ -124,7 +125,7 @@ export default function TripsScreen() {
             onPress={() => handleDiscoverForTrip(trip)}
           >
             <Ionicons name="people" size={16} color="#6366F1" />
-            <Text style={styles.discoverButtonText}>Find Travelers & Guides</Text>
+            <Text style={styles.discoverButtonText}>{t.trips.findTravelers}</Text>
           </TouchableOpacity>
         )}
       </TouchableOpacity>
@@ -134,16 +135,16 @@ export default function TripsScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Ionicons name="airplane-outline" size={64} color="#D1D5DB" />
-      <Text style={styles.emptyTitle}>No trips planned</Text>
+      <Text style={styles.emptyTitle}>{t.trips.noTrips}</Text>
       <Text style={styles.emptySubtitle}>
-        Start planning your next adventure and find travelers going to the same destination!
+        {t.trips.startPlanning}
       </Text>
       <TouchableOpacity
         style={styles.createButton}
         onPress={() => router.push('/trips/create')}
       >
         <Ionicons name="add" size={20} color="#fff" />
-        <Text style={styles.createButtonText}>Plan a Trip</Text>
+        <Text style={styles.createButtonText}>{t.trips.planTrip}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -151,7 +152,7 @@ export default function TripsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Trips</Text>
+        <Text style={styles.title}>{t.trips.title}</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => router.push('/trips/create')}
@@ -162,7 +163,7 @@ export default function TripsScreen() {
 
       {activeTrip && (
         <View style={styles.activeSection}>
-          <Text style={styles.sectionTitle}>Currently Traveling</Text>
+          <Text style={styles.sectionTitle}>{t.trips.currentlyTraveling}</Text>
           {renderTripCard({ item: activeTrip })}
         </View>
       )}

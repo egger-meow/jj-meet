@@ -16,6 +16,7 @@ import {
   undoSwipe,
 } from '../../src/store/slices/discoverySlice';
 import { SwipeCard } from '../../src/components/SwipeCard';
+import { t } from '../../src/i18n';
 
 export default function DiscoverScreen() {
   const dispatch = useAppDispatch();
@@ -52,7 +53,7 @@ export default function DiscoverScreen() {
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Discover</Text>
+          <Text style={styles.title}>{t.discovery.title}</Text>
           <View style={styles.headerButtons}>
             <TouchableOpacity onPress={handleRefresh}>
               <Feather name="refresh-cw" size={24} color="#6B7280" />
@@ -67,26 +68,26 @@ export default function DiscoverScreen() {
           {isLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#FF6B6B" />
-              <Text style={styles.loadingText}>Finding people nearby...</Text>
+              <Text style={styles.loadingText}>{t.discovery.findingPeople}</Text>
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
               <Feather name="alert-circle" size={48} color="#EF4444" />
               <Text style={styles.errorText}>{error}</Text>
               <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
-                <Text style={styles.retryButtonText}>Try Again</Text>
+                <Text style={styles.retryButtonText}>{t.common.retry}</Text>
               </TouchableOpacity>
             </View>
           ) : !currentCard ? (
             <View style={styles.emptyContainer}>
               <Feather name="compass" size={64} color="#E5E7EB" />
-              <Text style={styles.emptyTitle}>No more profiles</Text>
+              <Text style={styles.emptyTitle}>{t.discovery.noMoreProfiles}</Text>
               <Text style={styles.emptyText}>
-                Check back later or expand your search radius
+                {t.discovery.checkBackLater}
               </Text>
               <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
                 <Feather name="refresh-cw" size={20} color="#FFFFFF" />
-                <Text style={styles.refreshButtonText}>Refresh</Text>
+                <Text style={styles.refreshButtonText}>{t.discovery.refresh}</Text>
               </TouchableOpacity>
             </View>
           ) : (

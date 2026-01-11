@@ -1,0 +1,25 @@
+# Maestro E2E Test: Login Flow
+# Run with: maestro test .maestro/login.yaml
+
+appId: com.jjmeet.app
+
+---
+- launchApp
+
+- assertVisible: "Welcome"
+
+- tapOn: "Login"
+
+- tapOn:
+    id: "email-input"
+- inputText: "test@example.com"
+
+- tapOn:
+    id: "password-input"
+- inputText: "password123"
+
+- tapOn: "Sign In"
+
+- assertVisible:
+    text: "Discover"
+    timeout: 10000

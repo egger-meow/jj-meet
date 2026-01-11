@@ -66,7 +66,8 @@ const createTestMessage = async (db, matchId, senderId, content = 'Test message'
     match_id: matchId,
     sender_id: senderId,
     content,
-    is_read: false
+    is_read: false,
+    created_at: new Date().toISOString()
   };
 
   await db('messages').insert(messageData);

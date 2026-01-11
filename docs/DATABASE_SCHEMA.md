@@ -2,7 +2,7 @@
 
 > **Last Updated:** January 2026  
 > **Database:** PostgreSQL 14+ with PostGIS extension  
-> **Migrations:** 11 files in `backend/migrations/`
+> **Migrations:** 17 files in `backend/migrations/`
 
 ## Extensions Required
 
@@ -367,6 +367,12 @@ CREATE INDEX idx_reports_status ON reports(status);
 | 009 | `009_create_reports_table.js` | Abuse reports |
 | 010 | `010_add_missing_user_fields.js` | User characteristics + GiST |
 | 011 | `011_add_swipes_is_seen.js` | New likes badge |
+| 012 | `012_add_user_moderation_fields.js` | Shadow ban + ban fields |
+| 013 | `013_create_verification_tokens.js` | Email verification tokens |
+| 014 | `014_add_guide_profile_fields.js` | Guide specialties, availability, rate |
+| 015 | `015_create_meeting_locations.js` | Meeting locations + proposals |
+| 016 | `016_create_emergency_contacts.js` | Emergency contacts + meeting shares |
+| 017 | `017_create_moderation_logs.js` | Moderation action logging |
 
 ---
 

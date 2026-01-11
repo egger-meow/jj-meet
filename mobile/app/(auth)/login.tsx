@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from '../../src/store/hooks';
 import { login, clearError } from '../../src/store/slices/authSlice';
 import { Input, Button } from '../../src/components/ui';
 import { LinearGradient } from 'expo-linear-gradient';
+import { t } from '../../src/i18n';
 
 export default function LoginScreen() {
   const dispatch = useAppDispatch();
@@ -33,7 +34,7 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (error) {
-      Alert.alert('Login Failed', error);
+      Alert.alert(t.auth.loginFailed, error);
     }
   }, [error]);
 
@@ -41,13 +42,13 @@ export default function LoginScreen() {
     const errors: { email?: string; password?: string } = {};
     
     if (!formData.email) {
-      errors.email = 'Email is required';
+      errors.email = t.register.emailRequired;
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Invalid email format';
+      errors.email = t.register.invalidEmail;
     }
     
     if (!formData.password) {
-      errors.password = 'Password is required';
+      errors.password = t.register.passwordRequired;
     }
 
     setFormErrors(errors);
@@ -79,16 +80,16 @@ export default function LoginScreen() {
         >
           <View style={styles.card}>
             <View style={styles.header}>
-              <Text style={styles.title}>Welcome Back</Text>
-              <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+              <Text style={styles.title}>{t.auth.welcomeBack}</Text>
+              <Text style={styles.subtitle}>{t.auth.signInSubtitle}</Text>
             </View>
 
             <View style={styles.form}>
               <Input
-                label="Email"
+                label={t.auth.email}
                 value={formData.email}
                 onChangeText={(text) => setFormData({ ...formData, email: text })}
-                placeholder="your@email.com"
+                placeholder={t.auth.emailPlaceholder}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 icon="mail"
@@ -96,10 +97,10 @@ export default function LoginScreen() {
               />
 
               <Input
-                label="Password"
+                label={t.auth.password}
                 value={formData.password}
                 onChangeText={(text) => setFormData({ ...formData, password: text })}
-                placeholder="••••••••"
+                placeholder={t.auth.passwordPlaceholder}
                 secureTextEntry
                 icon="lock"
                 error={formErrors.password}
@@ -108,15 +109,15 @@ export default function LoginScreen() {
               <View style={styles.options}>
                 <TouchableOpacity style={styles.checkboxContainer}>
                   <View style={styles.checkbox} />
-                  <Text style={styles.checkboxLabel}>Remember me</Text>
+                  <Text style={styles.checkboxLabel}>{t.auth.rememberMe}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity>
-                  <Text style={styles.forgotPassword}>Forgot password?</Text>
+                  <Text style={styles.forgotPassword}>{t.auth.forgotPassword}</Text>
                 </TouchableOpacity>
               </View>
 
               <Button
-                title="Sign In"
+                title={t.auth.signIn}
                 onPress={handleLogin}
                 loading={isLoading}
                 size="large"
@@ -125,7 +126,7 @@ export default function LoginScreen() {
 
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Or continue with</Text>
+              <Text style={styles.dividerText}>{t.auth.orContinueWith}</Text>
               <View style={styles.dividerLine} />
             </View>
 
@@ -139,10 +140,10 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
+              <Text style={styles.footerText}>{t.auth.noAccount}</Text>
               <Link href="/(auth)/register" asChild>
                 <TouchableOpacity>
-                  <Text style={styles.footerLink}>Sign up now</Text>
+                  <Text style={styles.footerLink}>{t.auth.signUpNow}</Text>
                 </TouchableOpacity>
               </Link>
             </View>

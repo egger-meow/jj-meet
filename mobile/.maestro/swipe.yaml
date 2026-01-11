@@ -1,0 +1,30 @@
+# Maestro E2E Test: Swipe Flow
+# Run with: maestro test .maestro/swipe.yaml
+# Requires: User already logged in
+
+appId: com.jjmeet.app
+
+---
+- launchApp
+
+- assertVisible:
+    text: "Discover"
+    timeout: 5000
+
+# Swipe right (like)
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- assertVisible: "It's a Match!"
+  optional: true
+
+# Swipe left (pass)
+- swipe:
+    direction: LEFT
+    duration: 500
+
+# Navigate to matches
+- tapOn: "Matches"
+
+- assertVisible: "Your Matches"

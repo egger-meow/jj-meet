@@ -15,6 +15,14 @@ import { register } from '../../src/store/slices/authSlice';
 import { Input, Button } from '../../src/components/ui';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import { t } from '../../src/i18n';
+
+const MBTI_TYPES = [
+  'INTJ', 'INTP', 'ENTJ', 'ENTP',
+  'INFJ', 'INFP', 'ENFJ', 'ENFP',
+  'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ',
+  'ISTP', 'ISFP', 'ESTP', 'ESFP',
+];
 
 export default function RegisterScreen() {
   const dispatch = useAppDispatch();
@@ -37,6 +45,7 @@ export default function RegisterScreen() {
     flexible_schedule: false,
     bio: '',
     social_link: '',
+    mbti: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -45,16 +54,16 @@ export default function RegisterScreen() {
     const newErrors: Record<string, string> = {};
 
     if (currentStep === 1) {
-      if (!formData.email) newErrors.email = 'Email is required';
-      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email';
-      if (!formData.password) newErrors.password = 'Password is required';
-      else if (formData.password.length < 6) newErrors.password = 'Min 6 characters';
+      if (!formData.email) newErrors.email = t.register.emailRequired;
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = t.register.invalidEmail;
+      if (!formData.password) newErrors.password = t.register.passwordRequired;
+      else if (formData.password.length < 6) newErrors.password = t.register.passwordMinLength;
       if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
+        newErrors.confirmPassword = t.register.passwordMismatch;
       }
     } else if (currentStep === 2) {
-      if (!formData.name) newErrors.name = 'Name is required';
-      if (!formData.birth_date) newErrors.birth_date = 'Birth date is required';
+      if (!formData.name) newErrors.name = t.register.nameRequired;
+      if (!formData.birth_date) newErrors.birth_date = t.register.birthDateRequired;
     }
 
     setErrors(newErrors);
@@ -76,10 +85,10 @@ export default function RegisterScreen() {
     const result = await dispatch(register(submitData));
     
     if (register.fulfilled.match(result)) {
-      Alert.alert('Success', 'Welcome to JJ-Meet!');
+      Alert.alert(t.alerts.success, t.auth.registerSuccess);
       router.replace('/(tabs)');
     } else {
-      Alert.alert('Registration Failed', (result.payload as string) || 'Please try again');
+      Alert.alert(t.auth.registerFailed, (result.payload as string) || t.common.retry);
     }
   };
 
@@ -102,65 +111,71 @@ export default function RegisterScreen() {
   const renderStep1 = () => (
     <View style={styles.stepContent}>
       <Input
-        label="Email"
+        label={t.auth.email}
         value={formData.email}
         onChangeText={(v) => updateFormData('email', v)}
-        placeholder="your@email.com"
+        placeholder={t.auth.emailPlaceholder}
         keyboardType="email-address"
         icon="mail"
         error={errors.email}
       />
       <Input
-        label="Password"
+        label={t.auth.password}
         value={formData.password}
         onChangeText={(v) => updateFormData('password', v)}
-        placeholder="••••••••"
+        placeholder={t.auth.passwordPlaceholder}
         secureTextEntry
         icon="lock"
         error={errors.password}
       />
       <Input
-        label="Confirm Password"
+        label={t.auth.confirmPassword}
         value={formData.confirmPassword}
         onChangeText={(v) => updateFormData('confirmPassword', v)}
-        placeholder="••••••••"
+        placeholder={t.auth.passwordPlaceholder}
         secureTextEntry
         icon="lock"
         error={errors.confirmPassword}
       />
-      <Button title="Next" onPress={handleNext} size="large" />
+      <Button title={t.common.next} onPress={handleNext} size="large" />
     </View>
   );
+
+  const genderLabels: Record<string, string> = {
+    male: t.register.male,
+    female: t.register.female,
+    other: t.register.other,
+  };
 
   const renderStep2 = () => (
     <View style={styles.stepContent}>
       <Input
-        label="Name"
+        label={t.register.name}
         value={formData.name}
         onChangeText={(v) => updateFormData('name', v)}
-        placeholder="Your name"
+        placeholder={t.register.namePlaceholder}
         icon="user"
         error={errors.name}
       />
       <Input
-        label="Birth Date"
+        label={t.register.birthDate}
         value={formData.birth_date}
         onChangeText={(v) => updateFormData('birth_date', v)}
-        placeholder="YYYY-MM-DD"
+        placeholder={t.register.birthDatePlaceholder}
         icon="calendar"
         error={errors.birth_date}
       />
       <Input
-        label="Instagram / Social Link (for verification)"
+        label={t.register.socialLink}
         value={formData.social_link}
         onChangeText={(v) => updateFormData('social_link', v)}
-        placeholder="instagram.com/yourusername"
+        placeholder={t.register.socialLinkPlaceholder}
         icon="instagram"
         autoCapitalize="none"
       />
       
       <View style={styles.genderSection}>
-        <Text style={styles.sectionLabel}>Gender</Text>
+        <Text style={styles.sectionLabel}>{t.register.gender}</Text>
         <View style={styles.genderButtons}>
           {['male', 'female', 'other'].map((g) => (
             <TouchableOpacity
@@ -177,7 +192,7 @@ export default function RegisterScreen() {
                   formData.gender === g && styles.genderButtonTextActive,
                 ]}
               >
-                {g.charAt(0).toUpperCase() + g.slice(1)}
+                {genderLabels[g]}
               </Text>
             </TouchableOpacity>
           ))}
@@ -185,8 +200,8 @@ export default function RegisterScreen() {
       </View>
 
       <View style={styles.buttonRow}>
-        <Button title="Back" onPress={handleBack} variant="outline" style={{ flex: 1 }} />
-        <Button title="Next" onPress={handleNext} style={{ flex: 1 }} />
+        <Button title={t.common.back} onPress={handleBack} variant="outline" style={{ flex: 1 }} />
+        <Button title={t.common.next} onPress={handleNext} style={{ flex: 1 }} />
       </View>
     </View>
   );
@@ -194,38 +209,36 @@ export default function RegisterScreen() {
   const renderStep3 = () => (
     <View style={styles.stepContent}>
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>About Me</Text>
-        <Text style={styles.sectionHint}>
-          Help others know what you can offer when meeting up
-        </Text>
+        <Text style={styles.sectionLabel}>{t.register.aboutMe}</Text>
+        <Text style={styles.sectionHint}>{t.register.aboutMeHint}</Text>
         
         <View style={styles.characteristicsGrid}>
           <CheckboxItem
-            label="I have a car"
+            label={t.register.hasCar}
             checked={formData.has_car}
             onToggle={() => updateFormData('has_car', !formData.has_car)}
             icon="truck"
           />
           <CheckboxItem
-            label="I have a motorcycle"
+            label={t.register.hasMotorcycle}
             checked={formData.has_motorcycle}
             onToggle={() => updateFormData('has_motorcycle', !formData.has_motorcycle)}
             icon="zap"
           />
           <CheckboxItem
-            label="I speak English"
+            label={t.register.speaksEnglish}
             checked={formData.speaks_english}
             onToggle={() => updateFormData('speaks_english', !formData.speaks_english)}
             icon="globe"
           />
           <CheckboxItem
-            label="I speak local language"
+            label={t.register.speaksLocal}
             checked={formData.speaks_local}
             onToggle={() => updateFormData('speaks_local', !formData.speaks_local)}
             icon="message-circle"
           />
           <CheckboxItem
-            label="Flexible schedule"
+            label={t.register.flexibleSchedule}
             checked={formData.flexible_schedule}
             onToggle={() => updateFormData('flexible_schedule', !formData.flexible_schedule)}
             icon="clock"
@@ -233,19 +246,45 @@ export default function RegisterScreen() {
         </View>
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>{t.register.mbti}</Text>
+        <Text style={styles.sectionHint}>{t.register.mbtiHint}</Text>
+        <View style={styles.mbtiGrid}>
+          {MBTI_TYPES.map((type) => (
+            <TouchableOpacity
+              key={type}
+              style={[
+                styles.mbtiButton,
+                formData.mbti === type && styles.mbtiButtonActive,
+              ]}
+              onPress={() => updateFormData('mbti', type)}
+            >
+              <Text
+                style={[
+                  styles.mbtiButtonText,
+                  formData.mbti === type && styles.mbtiButtonTextActive,
+                ]}
+              >
+                {type}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
       <Input
-        label="Bio (optional)"
+        label={t.register.bio}
         value={formData.bio}
         onChangeText={(v) => updateFormData('bio', v)}
-        placeholder="Tell us about yourself..."
+        placeholder={t.register.bioPlaceholder}
         multiline
         numberOfLines={3}
       />
 
       <View style={styles.buttonRow}>
-        <Button title="Back" onPress={handleBack} variant="outline" style={{ flex: 1 }} />
+        <Button title={t.common.back} onPress={handleBack} variant="outline" style={{ flex: 1 }} />
         <Button
-          title="Complete"
+          title={t.register.complete}
           onPress={handleSubmit}
           loading={isLoading}
           style={{ flex: 1 }}
@@ -267,8 +306,8 @@ export default function RegisterScreen() {
         >
           <View style={styles.card}>
             <View style={styles.header}>
-              <Text style={styles.title}>Join JJ-Meet</Text>
-              <Text style={styles.subtitle}>Step {step} of 3</Text>
+              <Text style={styles.title}>{t.register.joinTitle}</Text>
+              <Text style={styles.subtitle}>{t.register.stepOf.replace('{step}', String(step))}</Text>
               {renderStepIndicator()}
             </View>
 
@@ -277,10 +316,10 @@ export default function RegisterScreen() {
             {step === 3 && renderStep3()}
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account? </Text>
+              <Text style={styles.footerText}>{t.auth.hasAccount}</Text>
               <Link href="/(auth)/login" asChild>
                 <TouchableOpacity>
-                  <Text style={styles.footerLink}>Sign in</Text>
+                  <Text style={styles.footerLink}>{t.auth.signInNow}</Text>
                 </TouchableOpacity>
               </Link>
             </View>
@@ -417,4 +456,30 @@ const styles = StyleSheet.create({
   },
   footerText: { fontSize: 14, color: '#6B7280' },
   footerLink: { fontSize: 14, color: '#FF6B6B', fontWeight: '600' },
+  mbtiGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  mbtiButton: {
+    width: '22%',
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+  },
+  mbtiButtonActive: {
+    borderColor: '#FF6B6B',
+    backgroundColor: '#FFF5F5',
+  },
+  mbtiButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  mbtiButtonTextActive: {
+    color: '#FF6B6B',
+  },
 });

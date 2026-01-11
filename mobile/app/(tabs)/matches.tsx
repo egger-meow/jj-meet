@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useAppSelector } from '../../src/store/hooks';
+import { t } from '../../src/i18n';
 
 export default function MatchesScreen() {
   const { matches } = useAppSelector((state) => state.matches);
@@ -9,15 +10,15 @@ export default function MatchesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Matches</Text>
+        <Text style={styles.title}>{t.matches.title}</Text>
       </View>
 
       {matches.length === 0 ? (
         <View style={styles.emptyState}>
           <Feather name="heart" size={64} color="#E5E7EB" />
-          <Text style={styles.emptyTitle}>No Matches Yet</Text>
+          <Text style={styles.emptyTitle}>{t.matches.noMatchesYet}</Text>
           <Text style={styles.emptyText}>
-            Start swiping to find your travel companions
+            {t.matches.startSwiping}
           </Text>
         </View>
       ) : (

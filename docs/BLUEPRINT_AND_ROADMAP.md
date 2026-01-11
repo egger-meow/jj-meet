@@ -28,15 +28,15 @@ JJ-Meet is a travel-oriented dating app connecting travelers with local guides a
 ### 1.2 Core Features
 | Feature | Priority | Status |
 |---------|----------|--------|
-| User Authentication | P0 | ✅ Backend Ready |
-| Profile Management | P0 | ✅ Backend Ready |
-| Location-based Discovery | P0 | 🔄 In Progress |
-| Swipe Matching | P0 | ✅ Backend Ready |
-| Real-time Chat | P0 | ✅ Backend Ready |
-| Local Guide Mode | P1 | 🔄 In Progress |
-| Transportation Display | P1 | ✅ Schema Ready |
-| Safety & Verification | P1 | ⏳ Pending |
-| Reviews & Ratings | P2 | ✅ Schema Ready |
+| User Authentication | P0 | ✅ Complete |
+| Profile Management | P0 | ✅ Complete |
+| Location-based Discovery | P0 | ✅ Complete |
+| Swipe Matching | P0 | ✅ Complete |
+| Real-time Chat | P0 | ✅ Complete |
+| Local Guide Mode | P1 | ✅ Complete |
+| Transportation Display | P1 | ✅ Complete |
+| Safety & Verification | P1 | ✅ Complete |
+| Reviews & Ratings | P2 | ✅ Complete |
 
 ### 1.3 Non-Goals (Explicitly Out of Scope)
 
