@@ -13,7 +13,7 @@ import { Stack, router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../src/store/hooks';
 import { logout } from '../src/store/slices/authSlice';
-import { t } from '../src/i18n';
+import { t, languages, getCurrentLanguage, setLanguage, LanguageCode } from '../src/i18n';
 
 export default function SettingsScreen() {
   const dispatch = useAppDispatch();
@@ -22,6 +22,24 @@ export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [showDistance, setShowDistance] = useState(true);
+  const [currentLang, setCurrentLang] = useState<LanguageCode>(getCurrentLanguage());
+
+  const handleLanguageChange = async () => {
+    const langOptions = Object.entries(languages).map(([code, { nativeName }]) => ({
+      text: nativeName,
+      onPress: async () => {
+        await setLanguage(code as LanguageCode);
+        setCurrentLang(code as LanguageCode);
+        Alert.alert('Language Changed', 'Please restart the app to apply changes.');
+      },
+    }));
+    
+    Alert.alert(
+      'Select Language / 選擇語言',
+      undefined,
+      [...langOptions, { text: t.common.cancel, style: 'cancel' }]
+    );
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -88,6 +106,11 @@ export default function SettingsScreen() {
             icon="user"
             label={t.profile.editProfile}
             onPress={() => {}}
+          />
+          <SettingsItem
+            icon="globe"
+            label={`Language / 語言: ${languages[currentLang].nativeName}`}
+            onPress={handleLanguageChange}
           />
           <SettingsItem
             icon="lock"

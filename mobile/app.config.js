@@ -52,6 +52,13 @@ export default {
           resizeMode: "contain",
           backgroundColor: "#ffffff"
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          organization: process.env.SENTRY_ORG || "jj-meet",
+          project: process.env.SENTRY_PROJECT || "jj-meet-mobile"
+        }
       ]
     ],
     experiments: {
@@ -60,6 +67,7 @@ export default {
     extra: {
       apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://localhost:5000",
       socketUrl: process.env.EXPO_PUBLIC_SOCKET_URL || "http://localhost:5000",
+      sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN || "",
       eas: {
         projectId: "your-project-id"
       }

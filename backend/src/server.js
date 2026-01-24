@@ -24,8 +24,12 @@ const emergencyRoutes = require('./routes/emergency.routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const { setupSocketHandlers } = require('./socket/socketHandlers');
 const { createPubSubClients } = require('./config/redis');
+const { initSentry, sentryErrorHandler } = require('./services/sentry.service');
 
 const app = express();
+
+// Initialize Sentry (must be before other middleware)
+initSentry(app);
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
@@ -85,6 +89,11 @@ app.get('/health', (req, res) => {
 
 // Socket.io setup
 setupSocketHandlers(io);
+
+// Sentry error handler (must be before other error handlers)
+if (process.env.SENTRY_DSN) {
+  app.use(sentryErrorHandler);
+}
 
 // Error handling
 app.use(errorHandler);

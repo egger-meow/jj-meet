@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import { store } from '../src/store';
 import { useAppDispatch, useAppSelector } from '../src/store/hooks';
 import { checkAuth } from '../src/store/slices/authSlice';
+import { initSentry, setUserContext } from '../src/services/sentryService';
 
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -19,6 +20,9 @@ export {
 export const unstable_settings = {
   initialRouteName: '(auth)',
 };
+
+// Initialize Sentry on app load
+initSentry();
 
 SplashScreen.preventAutoHideAsync();
 
@@ -52,13 +56,22 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth);
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
+
+  // Update Sentry user context when auth state changes
+  useEffect(() => {
+    if (user) {
+      setUserContext({ id: user.id, email: user.email, name: user.name });
+    } else {
+      setUserContext(null);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (isLoading) return;

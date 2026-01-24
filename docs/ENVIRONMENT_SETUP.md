@@ -1,22 +1,298 @@
 # Environment Setup Guide
 
-This document provides detailed instructions for configuring all environment variables required to run JJ-Meet.
+This document provides detailed instructions for configuring all environment variables and running JJ-Meet locally.
+
+---
+
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Quick Start](#quick-start)
+3. [Local Development Guide](#local-development-guide)
+4. [Environment Variables](#required-variables)
+5. [Troubleshooting](#troubleshooting)
+
+---
+
+## Prerequisites
+
+Before setting up JJ-Meet, ensure you have the following installed:
+
+### Required Software
+
+| Software | Version | Installation |
+|----------|---------|--------------|
+| **Node.js** | 18.x or 20.x | [nodejs.org](https://nodejs.org) |
+| **npm** | 9.x+ | Comes with Node.js |
+| **PostgreSQL** | 14+ with PostGIS | [postgresql.org](https://postgresql.org) |
+| **Redis** | 6+ | [redis.io](https://redis.io) or Docker |
+| **Git** | Latest | [git-scm.com](https://git-scm.com) |
+
+### For Mobile Development
+
+| Software | Version | Installation |
+|----------|---------|--------------|
+| **Expo CLI** | Latest | `npm install -g expo-cli` |
+| **Expo Go App** | Latest | App Store / Play Store |
+| **iOS Simulator** | (Mac only) | Xcode |
+| **Android Emulator** | (optional) | Android Studio |
+
+### Verify Installation
+
+```bash
+# Check versions
+node --version    # Should be v18.x or v20.x
+npm --version     # Should be 9.x+
+psql --version    # Should be 14+
+redis-cli --version  # Should be 6+
+```
 
 ---
 
 ## Quick Start
 
-1. Copy the example file:
+### 1. Clone and Install
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/jj-meet.git
+cd jj-meet
+
+# Install backend dependencies
+cd backend
+npm install
+
+# Install mobile dependencies
+cd ../mobile
+npm install
+```
+
+### 2. Setup Environment Files
+
+```bash
+# Backend
+cp backend/.env.example backend/.env
+
+# Mobile
+cp mobile/.env.example mobile/.env
+```
+
+### 3. Minimal Development Config
+
+Edit `backend/.env` with these minimum values:
+```env
+PORT=5000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/jjmeet_dev
+JWT_SECRET=dev-secret-key-change-in-production-min-32-chars
+
+REDIS_URL=redis://localhost:6379
+
+# Disable external services for local dev
+AWS_REKOGNITION_ENABLED=false
+```
+
+---
+
+## Local Development Guide
+
+### Option A: Backend Only
+
+Use this when working on API/backend features.
+
+#### Step 1: Start PostgreSQL
+
+```bash
+# Windows (if installed via installer)
+# PostgreSQL should auto-start as a service
+
+# Mac (Homebrew)
+brew services start postgresql
+
+# Linux
+sudo systemctl start postgresql
+
+# Or use Docker
+docker run -d --name jjmeet-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=jjmeet_dev \
+  -p 5432:5432 \
+  postgis/postgis:14-3.3
+```
+
+#### Step 2: Create Database & Enable PostGIS
+
+```bash
+# Connect to PostgreSQL
+psql -U postgres
+
+# In psql:
+CREATE DATABASE jjmeet_dev;
+\c jjmeet_dev
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+\q
+```
+
+#### Step 3: Start Redis
+
+```bash
+# Windows (WSL or Docker recommended)
+docker run -d --name jjmeet-redis -p 6379:6379 redis:7-alpine
+
+# Mac
+brew services start redis
+
+# Linux
+sudo systemctl start redis
+```
+
+#### Step 4: Run Migrations
+
+```bash
+cd backend
+npm run db:migrate
+```
+
+#### Step 5: Start Backend Server
+
+```bash
+cd backend
+npm run dev
+
+# You should see:
+# 🚀 Server running on port 5000
+# 📱 Environment: development
+```
+
+#### Step 6: Test Backend
+
+```bash
+# Health check
+curl http://localhost:5000/health
+
+# Should return: {"status":"OK","timestamp":"..."}
+```
+
+---
+
+### Option B: Mobile Only (with Mock/Existing Backend)
+
+Use when working on UI without backend changes.
+
+```bash
+cd mobile
+
+# If backend is running locally:
+# Edit .env: EXPO_PUBLIC_API_URL=http://localhost:5000
+
+# Start Expo
+npx expo start
+
+# Press:
+#   i - Open iOS Simulator
+#   a - Open Android Emulator
+#   w - Open Web browser
+#   Scan QR - Open on physical device with Expo Go
+```
+
+---
+
+### Option C: Full Stack (Backend + Mobile Together)
+
+Use for end-to-end development and testing.
+
+#### Terminal 1: Start Backend
+
+```bash
+cd backend
+npm run dev
+```
+
+#### Terminal 2: Start Mobile
+
+```bash
+cd mobile
+npx expo start
+```
+
+#### For Physical Device Testing
+
+1. Find your computer's local IP:
    ```bash
-   cp backend/.env.example backend/.env
+   # Windows
+   ipconfig
+   
+   # Mac/Linux
+   ifconfig | grep inet
    ```
 
-2. Fill in your values following the sections below.
+2. Update `mobile/.env`:
+   ```env
+   EXPO_PUBLIC_API_URL=http://192.168.x.x:5000
+   EXPO_PUBLIC_SOCKET_URL=http://192.168.x.x:5000
+   ```
 
-3. For development, you can start with minimal config:
-   - `DATABASE_URL` (required)
-   - `JWT_SECRET` (required)
-   - `REDIS_URL` (required for location features)
+3. Ensure your phone and computer are on the same WiFi network
+
+4. Scan QR code with Expo Go app
+
+---
+
+### Option D: Using Docker (All Services)
+
+```bash
+# Start all services with Docker Compose
+docker-compose up -d
+
+# This starts:
+# - PostgreSQL + PostGIS (port 5432)
+# - Redis (port 6379)
+# - Backend API (port 5000)
+```
+
+---
+
+## Testing Your Setup
+
+### Backend Tests
+
+```bash
+cd backend
+
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test file
+npm test -- auth.test.js
+```
+
+### Mobile Tests
+
+```bash
+cd mobile
+
+# Run tests
+npm test
+
+# Run with watch mode
+npm run test:watch
+```
+
+### Manual Testing Checklist
+
+| Feature | How to Test |
+|---------|-------------|
+| **Health Check** | `curl http://localhost:5000/health` |
+| **Register** | POST to `/api/auth/register` with email/password |
+| **Login** | POST to `/api/auth/login` |
+| **WebSocket** | Check console for "Socket connected" in mobile app |
 
 ---
 

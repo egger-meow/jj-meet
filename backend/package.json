@@ -16,6 +16,7 @@
     "test:integration": "cross-env NODE_ENV=test_integration jest tests/integration"
   },
   "dependencies": {
+    "@sentry/node": "^10.32.1",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
     "compression": "^1.7.4",
